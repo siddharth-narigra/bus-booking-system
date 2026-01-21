@@ -11,8 +11,8 @@ This file:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .database import engine, Base, SessionLocal
-from . import models
+from backend.database import engine, Base, SessionLocal
+from backend import models
 
 
 def seed_initial_data():
@@ -119,7 +119,7 @@ def create_app() -> FastAPI:
     seed_initial_data()
     
     # Import and register routes
-    from .routes import stations, seats, meals, bookings, predict
+    from backend.routes import stations, seats, meals, bookings, predict
     
     app.include_router(stations.router, prefix="/api", tags=["Stations"])
     app.include_router(seats.router, prefix="/api", tags=["Seats"])
