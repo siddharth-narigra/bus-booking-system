@@ -61,17 +61,11 @@ def seed_initial_data():
                     seat_num += 1
         db.add_all(seats)
         
-        # Seed Meals
+        # Seed Meals (3 simple options)
         meals = [
-            # Breakfast options
-            models.Meal(name="Poha with Chai", meal_type="breakfast", price=80.0),
-            models.Meal(name="Sandwich with Juice", meal_type="breakfast", price=100.0),
-            # Lunch options
-            models.Meal(name="Veg Thali", meal_type="lunch", price=150.0),
-            models.Meal(name="Paneer Rice Bowl", meal_type="lunch", price=120.0),
-            # Dinner options
-            models.Meal(name="Roti Sabzi", meal_type="dinner", price=130.0),
-            models.Meal(name="Dal Rice", meal_type="dinner", price=110.0),
+            models.Meal(name="Breakfast", meal_type="breakfast", price=80.0),
+            models.Meal(name="Lunch", meal_type="lunch", price=120.0),
+            models.Meal(name="Dinner", meal_type="dinner", price=100.0),
         ]
         db.add_all(meals)
         
