@@ -1,0 +1,12 @@
+# FastAPI and server (newer versions support Python 3.13)
+fastapi>=0.115.0
+uvicorn>=0.32.0
+
+# Database
+sqlalchemy>=2.0.25
+
+# Data validation (v2.10+ has Python 3.13 support)
+pydantic>=2.10.0
+
+# For prediction feature
+pandas>=2.0.0

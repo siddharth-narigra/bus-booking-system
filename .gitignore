@@ -1,2 +1,17 @@
-/venv
+# Virtual Environment
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Database
+*.db
+*.sqlite3
+
+
+# Task assignment (personal)
 task_assignment.md
