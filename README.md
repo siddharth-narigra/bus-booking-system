@@ -32,7 +32,7 @@ Select one or more available sleeper seats for booking.
 
 ### 4. Meal Booking
 
-Optionally add meals (breakfast/lunch/dinner) during the checkout process.
+Optionally add meals (breakfast/lunch/dinner) during the checkout process. Meals are charged per passenger.
 
 ### 5. Booking Summary
 
@@ -63,23 +63,16 @@ Comprehensive test cases covering functional, edge, and UI/UX scenarios.
 | UI/UX           | 4            |
 | **Total** | **20** |
 
-[View Detailed Test Cases](docs/TEST_CASES.md)
-
----
-
-## UI/UX Prototype
-
-<!-- TODO: Add Figma prototype link -->
-
-**Prototype Link:** [Coming Soon]()
+📄 [View Detailed Test Cases](docs/TEST_CASES.md)
 
 ---
 
 ## Tech Stack
 
-- **Backend:** Python
-- **Database:** (To be decided)
-- **Design:** Figma
+- **Backend:** Python (FastAPI)
+- **Database:** SQLite with SQLAlchemy ORM
+- **Frontend:** HTML, CSS, JavaScript
+- **API Docs:** Swagger UI (auto-generated)
 
 ---
 
@@ -88,27 +81,86 @@ Comprehensive test cases covering functional, edge, and UI/UX scenarios.
 ```
 bus-booking-system/
 ├── README.md
+├── requirements.txt
 ├── docs/
 │   ├── TEST_CASES.md
 │   └── PREDICTION_APPROACH.md
 ├── backend/
-│   └── (API source code)
-└── .gitignore
+│   ├── main.py
+│   ├── database.py
+│   ├── models.py
+│   ├── schemas.py
+│   └── routes/
+│       ├── stations.py
+│       ├── seats.py
+│       ├── meals.py
+│       ├── bookings.py
+│       └── predict.py
+└── frontend/
+    └── index.html
 ```
 
 ---
 
 ## Setup & Installation
 
-*(Instructions will be added after backend development)*
+### Prerequisites
+
+- Python 3.10+
+- pip
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/siddharth-narigra/bus-booking-system.git
+cd bus-booking-system
+
+# Create virtual environment
+python -m venv venv
+.\venv\Scripts\Activate  # Windows
+source venv/bin/activate  # Linux/Mac
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run backend server
+python -m uvicorn backend.main:app --reload --port 8000
+
+# In another terminal, serve frontend
+cd frontend
+python -m http.server 3000
+```
+
+### Access
+
+- **Frontend:** http://localhost:3000
+- **Backend API:** http://localhost:8000
+- **API Docs:** http://localhost:8000/docs
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /api/stations | List all stations |
+| GET | /api/seats | Get seats with availability |
+| GET | /api/meals | List meal options |
+| POST | /api/bookings | Create booking |
+| GET | /api/bookings/{id} | Get booking details |
+| DELETE | /api/bookings/{id} | Cancel booking |
+| POST | /api/predict | Get confirmation prediction |
 
 ---
 
 ## Documentation
 
-- [Test Cases](docs/TEST_CASES.md)
-- [Prediction Approach](docs/PREDICTION_APPROACH.md) *(Coming Soon)*
+- 📄 [Test Cases](docs/TEST_CASES.md)
+- 📄 [Prediction Approach](docs/PREDICTION_APPROACH.md)
 
 ---
 
 ## Author
+
+Siddharth Narigra
