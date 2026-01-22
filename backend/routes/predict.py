@@ -1,18 +1,20 @@
 """
 Prediction API route.
 
-This implements the "Booking Confirmation Prediction" feature.
-It's a mock/simulated prediction based on logical factors.
+This implements the "Booking Confirmation Prediction" feature using
+a trained Logistic Regression model.
 
-Why mock and not real ML?
-- We don't have real historical data
-- Assignment allows "mock or simulated model"
-- This demonstrates the thinking process which is what matters
+Evolution:
+- V1: Rule-based scoring (hardcoded weights)
+- V2: Logistic Regression trained on synthetic data (current)
 """
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
+import pickle
+import numpy as np
+import os
 
 from backend.database import get_db
 from backend import models, schemas
@@ -20,28 +22,45 @@ from backend import models, schemas
 
 router = APIRouter()
 
+# Load the trained model at startup
+MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'prediction_model.pkl')
 
-def calculate_prediction(
+_model_bundle = None
+
+def get_model():
+    """Load model once and cache it."""
+    global _model_bundle
+    if _model_bundle is None:
+        try:
+            with open(MODEL_PATH, 'rb') as f:
+                _model_bundle = pickle.load(f)
+        except FileNotFoundError:
+            # Fallback if model not trained yet
+            _model_bundle = None
+    return _model_bundle
+
+
+def calculate_prediction_ml(
     travel_date: str,
     seat_count: int,
+    meal_selected: bool,
+    seat_type: str,
     db: Session
 ) -> tuple[float, dict]:
     """
-    Calculate booking confirmation prediction.
+    Calculate booking confirmation prediction using Logistic Regression.
     
-    Factors considered:
-    1. Days until travel (more days = higher confirmation chance)
-    2. Seat occupancy for that date (higher demand = higher confirmation)
-    3. Day of week (weekends have higher demand)
-    4. Number of seats being booked (more seats = slightly lower as group bookings sometimes cancel)
+    Features used:
+    - seat_type: 0 = upper, 1 = lower
+    - meal_selected: 0 = no, 1 = yes
+    - booking_lead_days: days until travel
+    - day_of_week: 0-6 (Mon-Sun)
+    - num_seats: number of seats booked
     
     Returns:
     - prediction_percentage: 0-100 float
-    - factors: breakdown of how each factor contributed
+    - factors: explanation of input features
     """
-    
-    base_score = 75.0  # Start with 75% base confirmation rate
-    factors = {}
     
     # Parse travel date
     try:
@@ -49,99 +68,45 @@ def calculate_prediction(
     except ValueError:
         return 70.0, {"error": "Invalid date format"}
     
-    # Factor 1: Days until travel
-    # Bookings made further in advance are more likely to be confirmed
-    days_until_travel = (parsed_date - date.today()).days
-    
-    if days_until_travel < 0:
-        days_factor = -50.0  # Past date, very low
-    elif days_until_travel == 0:
-        days_factor = -10.0  # Same day, lower
-    elif days_until_travel <= 2:
-        days_factor = -5.0   # Very close, slightly lower
-    elif days_until_travel <= 7:
-        days_factor = 5.0    # Within a week, good
-    elif days_until_travel <= 14:
-        days_factor = 10.0   # Two weeks, better
-    else:
-        days_factor = 15.0   # More than 2 weeks, excellent
-    
-    factors["days_until_travel"] = {
-        "days": days_until_travel,
-        "impact": days_factor,
-        "reasoning": "Advance bookings have higher confirmation rates"
-    }
-    
-    # Factor 2: Current seat occupancy for that date
-    # Higher occupancy = popular route = higher confirmation
-    total_seats = db.query(models.Seat).count()
-    booked_seats = db.query(models.BookingSeat).join(
-        models.Booking
-    ).filter(
-        models.Booking.travel_date == travel_date,
-        models.Booking.status == "confirmed"
-    ).count()
-    
-    occupancy_rate = (booked_seats / total_seats * 100) if total_seats > 0 else 0
-    
-    if occupancy_rate >= 80:
-        occupancy_factor = 12.0  # High demand
-    elif occupancy_rate >= 50:
-        occupancy_factor = 8.0   # Moderate demand
-    elif occupancy_rate >= 25:
-        occupancy_factor = 5.0   # Low-moderate demand
-    else:
-        occupancy_factor = 0.0   # Low demand, neutral
-    
-    factors["seat_occupancy"] = {
-        "current_occupancy_percent": round(occupancy_rate, 1),
-        "impact": occupancy_factor,
-        "reasoning": "Higher demand correlates with committed travelers"
-    }
-    
-    # Factor 3: Day of week
-    # Weekend travel has higher confirmation (definite plans)
+    # Calculate features
+    booking_lead_days = max(0, (parsed_date - date.today()).days)
     day_of_week = parsed_date.weekday()
-    day_name = parsed_date.strftime("%A")
+    seat_type_encoded = 1 if seat_type == "lower" else 0
+    meal_encoded = 1 if meal_selected else 0
     
-    if day_of_week in [4, 5, 6]:  # Friday, Saturday, Sunday
-        day_factor = 5.0
-    elif day_of_week == 0:  # Monday
-        day_factor = 3.0
-    else:
-        day_factor = 0.0
-    
-    factors["day_of_week"] = {
-        "day": day_name,
-        "impact": day_factor,
-        "reasoning": "Weekend/Monday travel shows confirmed intent"
+    factors = {
+        "seat_type": {"value": seat_type, "encoded": seat_type_encoded},
+        "meal_selected": {"value": meal_selected, "encoded": meal_encoded},
+        "booking_lead_days": {"value": booking_lead_days},
+        "day_of_week": {"value": parsed_date.strftime("%A"), "encoded": day_of_week},
+        "num_seats": {"value": seat_count}
     }
     
-    # Factor 4: Number of seats
-    # Single travelers more likely to confirm than groups
-    if seat_count == 1:
-        seat_count_factor = 3.0
-    elif seat_count == 2:
-        seat_count_factor = 2.0
-    elif seat_count <= 4:
-        seat_count_factor = 0.0
-    else:
-        seat_count_factor = -3.0  # Large groups sometimes cancel
+    # Get model
+    bundle = get_model()
     
-    factors["seat_count"] = {
-        "seats": seat_count,
-        "impact": seat_count_factor,
-        "reasoning": "Smaller bookings have higher confirmation rates"
-    }
+    if bundle is None:
+        # Fallback to simple rule-based if model not available
+        base = 75.0
+        prediction = base + (booking_lead_days * 0.5) + (meal_encoded * 5) - ((seat_count - 1) * 2)
+        prediction = max(0, min(100, prediction))
+        factors["model"] = "rule-based (fallback)"
+        return round(prediction, 1), factors
     
-    # Calculate final prediction
-    total_adjustment = days_factor + occupancy_factor + day_factor + seat_count_factor
-    prediction = base_score + total_adjustment
+    # Make prediction with ML model
+    model = bundle['model']
+    scaler = bundle['scaler']
     
-    # Clamp between 0 and 100
-    prediction = max(0, min(100, prediction))
+    features = np.array([[seat_type_encoded, meal_encoded, booking_lead_days, day_of_week, seat_count]])
+    features_scaled = scaler.transform(features)
     
-    return round(prediction, 1), factors
+    # Get probability of confirmation (class 1)
+    probability = model.predict_proba(features_scaled)[0][1]
+    prediction = round(probability * 100, 1)
+    
+    factors["model"] = "logistic_regression"
+    
+    return prediction, factors
 
 
 @router.post("/predict", response_model=schemas.PredictionResponse)
@@ -150,18 +115,17 @@ def get_prediction(
     db: Session = Depends(get_db)
 ):
     """
-    Get booking confirmation prediction.
+    Get booking confirmation prediction using trained ML model.
     
-    This endpoint is called during the booking summary step
-    to show users how likely their booking is to be confirmed.
-    
-    Note: This is a mock prediction for demonstration.
-    In production, this would use a trained ML model with real historical data.
+    This endpoint uses a Logistic Regression model trained on
+    synthetic booking data to predict confirmation likelihood.
     """
     
-    prediction, factors = calculate_prediction(
+    prediction, factors = calculate_prediction_ml(
         travel_date=request.travel_date,
         seat_count=request.seat_count,
+        meal_selected=getattr(request, 'meal_selected', False),
+        seat_type=getattr(request, 'seat_type', 'lower'),
         db=db
     )
     
