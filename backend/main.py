@@ -112,6 +112,11 @@ def create_app() -> FastAPI:
     # Seed initial data
     seed_initial_data()
     
+    # Preload prediction model to avoid cold-start delay
+    from backend.routes.predict import get_model
+    get_model()
+    print("Prediction model loaded.")
+    
     # Import and register routes
     from backend.routes import stations, seats, meals, bookings, predict
     
