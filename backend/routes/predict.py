@@ -23,29 +23,34 @@ from backend import models, schemas
 router = APIRouter()
 
 # Load the trained model at startup
-MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'prediction_model.pkl')
-
 _model_bundle = None
 
 def get_model():
     """Load model once and cache it."""
     global _model_bundle
     if _model_bundle is None:
-        try:
-            with open(MODEL_PATH, 'rb') as f:
-                _model_bundle = pickle.load(f)
-        except FileNotFoundError:
-            # Fallback if model not trained yet
-            _model_bundle = None
+        # Try multiple possible paths
+        possible_paths = [
+            os.path.join(os.path.dirname(__file__), '..', '..', 'models', 'prediction_model.pkl'),
+            os.path.join('models', 'prediction_model.pkl'),
+            'models/prediction_model.pkl'
+        ]
+        
+        for path in possible_paths:
+            try:
+                with open(path, 'rb') as f:
+                    _model_bundle = pickle.load(f)
+                    break
+            except FileNotFoundError:
+                continue
     return _model_bundle
 
 
 def calculate_prediction_ml(
     travel_date: str,
     seat_count: int,
-    meal_selected: bool,
-    seat_type: str,
-    db: Session
+    meal_selected: bool = False,
+    seat_type: str = 'lower'
 ) -> tuple[float, dict]:
     """
     Calculate booking confirmation prediction using Logistic Regression.
@@ -89,6 +94,8 @@ def calculate_prediction_ml(
         # Fallback to simple rule-based if model not available
         base = 75.0
         prediction = base + (booking_lead_days * 0.5) + (meal_encoded * 5) - ((seat_count - 1) * 2)
+        if day_of_week in [4, 5, 6]:  # Weekend
+            prediction += 5
         prediction = max(0, min(100, prediction))
         factors["model"] = "rule-based (fallback)"
         return round(prediction, 1), factors
@@ -125,8 +132,7 @@ def get_prediction(
         travel_date=request.travel_date,
         seat_count=request.seat_count,
         meal_selected=getattr(request, 'meal_selected', False),
-        seat_type=getattr(request, 'seat_type', 'lower'),
-        db=db
+        seat_type=getattr(request, 'seat_type', 'lower')
     )
     
     return schemas.PredictionResponse(
