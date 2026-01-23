@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This document explains the **Booking Confirmation Prediction** feature - an AI-powered system that predicts the likelihood of a booking being confirmed vs cancelled.
+This document explains the **Booking Confirmation Prediction** feature - machine-learning–based system that predicts the likelihood of a booking being confirmed vs cancelled.
 
 **Key Achievement:** Evolution from a Rule-Based model to a trained **Logistic Regression** model, demonstrating iterative improvement in ML development. The rule-based phase served as a baseline to validate feature assumptions before transitioning to a learned model.
 
@@ -25,12 +25,14 @@ Prediction = Base Score
 ```
 
 **Rationale for starting here:**
+
 - No historical data available
 - Quick to implement and test
 - Fully explainable logic
 - Demonstrates understanding of domain factors
 
 **Limitations:**
+
 - Hardcoded weights are assumptions, not learned
 - Cannot adapt to real patterns
 - May not generalize well
@@ -53,28 +55,28 @@ Since real historical booking data is unavailable, a **synthetic dataset** with 
 
 ### Dataset Specifications
 
-| Parameter | Value |
-|-----------|-------|
-| **Total Samples** | 1,000 |
-| **Confirmation Rate** | ~80% |
-| **Train/Test Split** | 80/20 |
+| Parameter                   | Value |
+| --------------------------- | ----- |
+| **Total Samples**     | 1,000 |
+| **Confirmation Rate** | ~80%  |
+| **Train/Test Split**  | 80/20 |
 
 ### Features
 
-| Feature | Type | Range | Description |
-|---------|------|-------|-------------|
-| `seat_type` | Binary | 0=upper, 1=lower | Deck preference |
-| `meal_selected` | Binary | 0=no, 1=yes | Meal commitment indicator |
-| `booking_lead_days` | Integer | 0-30 | Days before travel |
-| `day_of_week` | Integer | 0-6 | Mon=0, Sun=6 |
-| `num_seats` | Integer | 1-4 | Seats booked |
+| Feature               | Type    | Range            | Description               |
+| --------------------- | ------- | ---------------- | ------------------------- |
+| `seat_type`         | Binary  | 0=upper, 1=lower | Deck preference           |
+| `meal_selected`     | Binary  | 0=no, 1=yes      | Meal commitment indicator |
+| `booking_lead_days` | Integer | 0-30             | Days before travel        |
+| `day_of_week`       | Integer | 0-6              | Mon=0, Sun=6              |
+| `num_seats`         | Integer | 1-4              | Seats booked              |
 
 ### Target Variable
 
-| Label | Value | Meaning |
-|-------|-------|---------|
-| `confirmed` | 1 | Booking completed successfully |
-| `confirmed` | 0 | Booking was cancelled |
+| Label         | Value | Meaning                        |
+| ------------- | ----- | ------------------------------ |
+| `confirmed` | 1     | Booking completed successfully |
+| `confirmed` | 0     | Booking was cancelled          |
 
 ### Data Generation Logic
 
@@ -83,35 +85,35 @@ The synthetic data follows realistic booking behavior patterns:
 ```python
 def calculate_confirmation_probability(row):
     base_prob = 0.70  # 70% base confirmation rate
-    
+  
     # Lower deck = more committed (+5%)
     seat_effect = 0.05 if row['seat_type'] == 1 else 0
-    
+  
     # Meal selected = more invested (+10%)
     meal_effect = 0.10 if row['meal_selected'] == 1 else 0
-    
+  
     # More lead days = planned trip (+0.5% per day, max +15%)
     lead_effect = min(row['booking_lead_days'] * 0.005, 0.15)
-    
+  
     # Weekend travel = leisure, more committed (+8%)
     is_weekend = row['day_of_week'] in [4, 5, 6]
     weekend_effect = 0.08 if is_weekend else 0
-    
+  
     # More seats = group coordination issues (-3% per extra seat)
     seat_count_effect = -(row['num_seats'] - 1) * 0.03
-    
+  
     return base_prob + seat_effect + meal_effect + lead_effect + weekend_effect + seat_count_effect
 ```
 
 ### Sample Data
 
 | seat_type | meal_selected | booking_lead_days | day_of_week | num_seats | confirmed |
-|-----------|---------------|-------------------|-------------|-----------|-----------|
-| 0 | 0 | 27 | 6 | 2 | 1 |
-| 1 | 1 | 6 | 5 | 2 | 1 |
-| 1 | 1 | 2 | 4 | 1 | 1 |
-| 0 | 1 | 13 | 1 | 1 | 0 |
-| 1 | 0 | 15 | 5 | 1 | 1 |
+| --------- | ------------- | ----------------- | ----------- | --------- | --------- |
+| 0         | 0             | 27                | 6           | 2         | 1         |
+| 1         | 1             | 6                 | 5           | 2         | 1         |
+| 1         | 1             | 2                 | 4           | 1         | 1         |
+| 0         | 1             | 13                | 1           | 1         | 0         |
+| 1         | 0             | 15                | 5           | 1         | 1         |
 
 ---
 
@@ -121,12 +123,12 @@ def calculate_confirmation_probability(row):
 
 **Why Logistic Regression?**
 
-| Criteria | Logistic Regression | Random Forest | Neural Network |
-|----------|---------------------|---------------|----------------|
-| **Interpretability** | ✅ High | Medium | Low |
-| **Training Speed** | ✅ Fast | Medium | Slow |
-| **Data Requirements** | ✅ Low | Medium | High |
-| **Overfitting Risk** | ✅ Low | Medium | High |
+| Criteria                    | Logistic Regression | Random Forest | Neural Network |
+| --------------------------- | ------------------- | ------------- | -------------- |
+| **Interpretability**  | ✅ High             | Medium        | Low            |
+| **Training Speed**    | ✅ Fast             | Medium        | Slow           |
+| **Data Requirements** | ✅ Low              | Medium        | High           |
+| **Overfitting Risk**  | ✅ Low              | Medium        | High           |
 
 For this use case, **interpretability** and **simplicity** are prioritized over marginal accuracy gains.
 
@@ -157,22 +159,22 @@ pickle.dump({'model': model, 'scaler': scaler}, open('prediction_model.pkl', 'wb
 
 ### Model Performance
 
-| Metric | Value |
-|--------|-------|
-| **Accuracy** | ~80% |
-| **Precision (Confirmed)** | 0.80 |
-| **Recall (Confirmed)** | 1.00 |
-| **F1-Score** | 0.89 |
+| Metric                          | Value |
+| ------------------------------- | ----- |
+| **Accuracy**              | ~80%  |
+| **Precision (Confirmed)** | 0.80  |
+| **Recall (Confirmed)**    | 1.00  |
+| **F1-Score**              | 0.89  |
 
 ### Feature Coefficients (Learned Weights)
 
-| Feature | Coefficient | Effect |
-|---------|-------------|--------|
-| `meal_selected` | +0.45 | ↑ Higher confirmation |
-| `booking_lead_days` | +0.38 | ↑ Higher confirmation |
-| `seat_type` (lower) | +0.22 | ↑ Higher confirmation |
-| `day_of_week` | +0.15 | ↑ Weekend = Higher |
-| `num_seats` | -0.18 | ↓ More seats = Lower |
+| Feature               | Coefficient | Effect                 |
+| --------------------- | ----------- | ---------------------- |
+| `meal_selected`     | +0.45       | ↑ Higher confirmation |
+| `booking_lead_days` | +0.38       | ↑ Higher confirmation |
+| `seat_type` (lower) | +0.22       | ↑ Higher confirmation |
+| `day_of_week`       | +0.15       | ↑ Weekend = Higher    |
+| `num_seats`         | -0.18       | ↓ More seats = Lower  |
 
 **Key Insight:** The model learned that **meal selection** is the strongest predictor of commitment - passengers who pre-order meals are significantly more likely to confirm their booking.
 
