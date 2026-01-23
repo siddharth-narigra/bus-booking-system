@@ -4,7 +4,7 @@
 
 This document explains the **Booking Confirmation Prediction** feature - an AI-powered system that predicts the likelihood of a booking being confirmed vs cancelled.
 
-**Key Achievement:** Evolution from a Rule-Based model to a trained **Logistic Regression** model, demonstrating iterative improvement in ML development.
+**Key Achievement:** Evolution from a Rule-Based model to a trained **Logistic Regression** model, demonstrating iterative improvement in ML development. The rule-based phase served as a baseline to validate feature assumptions before transitioning to a learned model.
 
 ---
 
