@@ -514,6 +514,24 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* Cold Start Banner */
+        .cold-start-banner {
+            background: #fef3c7;
+            border-bottom: 1px solid #f59e0b;
+            color: #92400e;
+            text-align: center;
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            transition: opacity 0.3s ease, max-height 0.3s ease;
+        }
+
+        .cold-start-banner.hidden {
+            opacity: 0;
+            max-height: 0;
+            padding: 0;
+            overflow: hidden;
+        }
     </style>
 </head>
 
@@ -522,6 +540,10 @@
         <h1>Sleeper Bus Booking</h1>
         <p>Ahmedabad → Vadodara → Surat → Vapi → Mumbai</p>
     </header>
+
+    <div id="coldStartBanner" class="cold-start-banner">
+        Backend is hosted on an on-demand service. First request may take up to 30 seconds.
+    </div>
 
     <div class="container">
         <!-- Progress Steps -->
@@ -745,6 +767,9 @@
                 // Update dropping options (filters based on boarding)
                 updateDroppingOptions();
                 validateStep1();
+
+                // Hide cold start banner once API responds
+                document.getElementById('coldStartBanner').classList.add('hidden');
             } catch (error) {
                 console.error('Error loading stations:', error);
             }
