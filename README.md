@@ -18,7 +18,7 @@ Ahmedabad → Vadodara → Surat → Vapi → Mumbai
 
 ## Live Demo
 
-- **Frontend:** https://bus-booking-system-siddharth.vercel.app
+- **Frontend:** https://bus-booking-system-alpha.vercel.app
 - **Backend API:** https://bus-booking-system-yqmk.onrender.com
 - **API Docs (Swagger):** https://bus-booking-system-yqmk.onrender.com/docs
 
