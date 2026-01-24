@@ -515,6 +515,172 @@
             }
         }
 
+        /* Booking Details Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        /* Copy Button */
+        /* Copy Layout */
+        .booking-id-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            flex-direction: column;
+        }
+
+        .booking-id-wrapper {
+            display: inline-flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .booking-id-wrapper:hover {
+            border-color: #10b981;
+            background: #ecfdf5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .booking-id-wrapper:active {
+            transform: translateY(0);
+        }
+
+        .booking-id-text {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #334155;
+            margin-right: 15px;
+            letter-spacing: 2px;
+        }
+
+        .copy-icon {
+            color: #94a3b8;
+            transition: color 0.2s;
+        }
+
+        .booking-id-wrapper:hover .copy-icon {
+            color: #10b981;
+        }
+
+        /* Tooltip */
+        .booking-id-wrapper::after {
+            content: "Click to Copy";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            background: #1e293b;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .booking-id-wrapper::before {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-3px);
+            border: 6px solid transparent;
+            border-top-color: #1e293b;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+        }
+
+        .booking-id-wrapper:hover::after,
+        .booking-id-wrapper:hover::before {
+            opacity: 1;
+        }
+
+        /* Copied State */
+        .booking-id-wrapper.copied {
+            border-color: #16a34a;
+            border-style: solid;
+            background: #f0fdf4;
+        }
+
+        .booking-id-wrapper.copied .copy-icon {
+            color: #16a34a;
+        }
+
+        .booking-id-wrapper.copied::after {
+            content: "Copied!";
+            background: #16a34a;
+        }
+
+        .booking-id-wrapper.copied::before {
+            border-top-color: #16a34a;
+        }
+
+        /* Update Cancel Section to Check Section */
+        .check-section {
+            margin-top: 40px;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            border-radius: 8px;
+        }
+
         /* Cold Start Banner */
         .cold-start-banner {
             background: #fef3c7;
@@ -692,30 +858,59 @@
                 <div class="checkmark"></div>
                 <h2>Booking Confirmed!</h2>
                 <p>Your booking has been successfully confirmed.</p>
-                <div class="booking-id" id="bookingIdDisplay">BK------</div>
+
+                <div class="booking-id-container">
+                    <div class="booking-id-wrapper" id="copyBookingId">
+                        <span class="booking-id-text" id="bookingIdDisplay">BK------</span>
+                        <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                </div>
+
                 <p>Save this Booking ID for future reference.</p>
 
-                <div class="btn-group" style="justify-content: center; margin-top: 30px;">
+                <div class="btn-group" style="justify-content: center; margin-top: 20px;">
                     <button class="btn btn-primary" id="newBooking">Book Another</button>
                 </div>
             </div>
         </div>
 
-        <!-- Cancel Booking Section -->
-        <div class="cancel-section" id="cancelSection">
-            <h3>Cancel Existing Booking</h3>
+        <!-- Manage Booking Section -->
+        <div class="check-section" id="manageSection">
+            <h3>Manage Booking</h3>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">Enter your Booking ID to view details or
+                cancel.</p>
             <div style="display: flex; gap: 10px;">
-                <input type="text" id="cancelBookingId" placeholder="Enter Booking ID (e.g., BK7X3M9K)"
-                    style="margin: 0; flex: 1;">
-                <button class="btn btn-secondary" id="cancelBtn">Cancel Booking</button>
+                <input type="text" id="checkBookingId" placeholder="Enter Booking ID (e.g., BK7X3M9K)"
+                    style="margin: 0; flex: 1; text-transform: uppercase;">
+                <button class="btn btn-secondary" id="checkBtn">Check Status</button>
             </div>
-            <div id="cancelMessage" class="hidden" style="margin-top: 10px;"></div>
+            <div id="checkMessage" class="hidden" style="margin-top: 10px;"></div>
+        </div>
+    </div>
+
+    <!-- Booking Details Modal -->
+    <div class="modal-overlay" id="bookingModal">
+        <div class="modal-card">
+            <button class="modal-close" id="closeModalBtn">&times;</button>
+            <h3 style="margin-bottom: 20px;">Booking Details</h3>
+            <div id="modalContent"></div>
+            <div id="modalActions" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+                <button class="btn btn-secondary"
+                    style="width: 100%; background: #fee2e2; color: #dc2626; border: 1px solid #ef4444;"
+                    id="modalCancelBtn">Cancel Booking</button>
+            </div>
         </div>
     </div>
 
     <script>
         // API Base URL (Production: Render, Local: localhost)
-        const API_BASE = 'https://bus-booking-system-yqmk.onrender.com/api';
+        // API Base URL (Production: Render, Local: localhost)
+        // const API_BASE = 'https://bus-booking-system-yqmk.onrender.com/api'; 
+        const API_BASE = 'http://127.0.0.1:8000/api';
 
         // State
         let stations = [];
@@ -738,9 +933,21 @@
             document.getElementById('travelDate').min = today;
             document.getElementById('travelDate').value = today;
 
-            // Load stations
+            // Load initial data
             await loadStations();
 
+            // Setup Management Listeners
+            if (document.getElementById('copyBookingId')) {
+                document.getElementById('copyBookingId').addEventListener('click', copyToClipboard);
+            }
+            document.getElementById('checkBtn').addEventListener('click', checkBookingStatus);
+            document.getElementById('modalCancelBtn').addEventListener('click', cancelBookingFromModal);
+
+            // Close modal events
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+            document.getElementById('bookingModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('bookingModal')) closeModal();
+            });
             // Setup event listeners
             setupEventListeners();
         }
@@ -1053,36 +1260,162 @@
             }
         }
 
-        async function cancelBooking() {
-            const bookingId = document.getElementById('cancelBookingId').value.trim().toUpperCase();
-            const msgDiv = document.getElementById('cancelMessage');
+        // Copy to Clipboard
+        function copyToClipboard() {
+            const bookingId = document.getElementById('bookingIdDisplay').textContent;
+            navigator.clipboard.writeText(bookingId).then(() => {
+                const wrapper = document.getElementById('copyBookingId');
+                wrapper.classList.add('copied');
+                setTimeout(() => {
+                    wrapper.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Check Booking Status
+        async function checkBookingStatus() {
+            const bookingId = document.getElementById('checkBookingId').value.trim().toUpperCase();
+            const msgDiv = document.getElementById('checkMessage');
 
             if (!bookingId) {
-                msgDiv.className = 'error-msg';
-                msgDiv.textContent = 'Please enter a booking ID';
+                msgDiv.className = 'field-error';
+                msgDiv.textContent = 'Please enter a Booking ID';
+                msgDiv.style.display = 'block'; // Ensure visible
                 msgDiv.classList.remove('hidden');
                 return;
             }
 
+            msgDiv.classList.add('hidden');
+            const checkBtn = document.getElementById('checkBtn');
+            const originalText = checkBtn.textContent;
+
+            checkBtn.textContent = 'Checking...';
+            checkBtn.disabled = true;
+
             try {
-                const response = await fetch(`${API_BASE}/bookings/${bookingId}`, {
+                const response = await fetch(`${API_BASE}/bookings/${bookingId}`);
+                if (response.ok) {
+                    const booking = await response.json();
+                    showBookingModal(booking);
+                } else {
+                    const error = await response.json();
+                    msgDiv.className = 'field-error';
+                    msgDiv.textContent = error.detail || 'Booking not found';
+                    msgDiv.style.display = 'block';
+                    msgDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                msgDiv.className = 'field-error';
+                msgDiv.textContent = 'Error fetching booking details';
+                msgDiv.classList.remove('hidden');
+                msgDiv.style.display = 'block';
+            } finally {
+                checkBtn.textContent = originalText;
+                checkBtn.disabled = false;
+            }
+        }
+
+        let currentModalBookingId = null;
+
+        function showBookingModal(booking) {
+            currentModalBookingId = booking.booking_id;
+            const content = document.getElementById('modalContent');
+            const cancelBtn = document.getElementById('modalCancelBtn');
+
+            // Check status for styling
+            const statusColor = booking.status === 'confirmed' ? '#16a34a' : '#dc2626';
+            const statusText = booking.status.charAt(0).toUpperCase() + booking.status.slice(1);
+
+            // Disable cancel if already cancelled
+            if (booking.status === 'cancelled') {
+                cancelBtn.style.display = 'none';
+            } else {
+                cancelBtn.style.display = 'block';
+            }
+
+            content.innerHTML = `
+                <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <strong>Booking ID:</strong>
+                        <span style="font-family: monospace; font-size: 1.1em;">${booking.booking_id}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <strong>Status:</strong>
+                        <span style="color: ${statusColor}; font-weight: bold;">${statusText}</span>
+                    </div>
+                </div>
+
+                <div class="summary-row">
+                    <span>Passenger</span>
+                    <span>${booking.passenger_name}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Route</span>
+                    <span>${booking.boarding_station} → ${booking.dropping_station}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Date</span>
+                    <span>${new Date(booking.travel_date).toLocaleDateString()}</span>
+                </div>
+                
+                <h4 style="margin: 20px 0 10px;">Seats & Meals</h4>
+                ${booking.seats.map(seat => `
+                    <div class="summary-row">
+                        <span>Seat ${seat.seat_number} (${seat.deck})</span>
+                        <span>₹${seat.price}</span>
+                    </div>
+                `).join('')}
+                
+                ${booking.meals.map(meal => `
+                    <div class="summary-row">
+                        <span>Meal: ${meal.meal_name} (for Seat ${meal.seat_number})</span>
+                        <span>₹${meal.price}</span>
+                    </div>
+                `).join('')}
+                
+                <div class="summary-row total">
+                    <span>Total Amount</span>
+                    <span>₹${booking.total_amount}</span>
+                </div>
+            `;
+
+            document.getElementById('bookingModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('bookingModal').classList.remove('active');
+            currentModalBookingId = null;
+        }
+
+        async function cancelBookingFromModal() {
+            if (!confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) return;
+
+            const btn = document.getElementById('modalCancelBtn');
+            const originalText = btn.textContent;
+
+            btn.textContent = 'Cancelling...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/bookings/${currentModalBookingId}`, {
                     method: 'DELETE'
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
-                    msgDiv.className = 'success-msg';
-                    msgDiv.textContent = `Booking ${data.booking_id} cancelled. Refund: ₹${data.refund_amount}`;
+                    alert('Booking cancelled successfully.');
+                    closeModal();
+                    // Clear input
+                    document.getElementById('checkBookingId').value = '';
+                    document.getElementById('checkMessage').classList.add('hidden');
                 } else {
                     const error = await response.json();
-                    msgDiv.className = 'error-msg';
-                    msgDiv.textContent = error.detail;
+                    alert('Failed to cancel: ' + error.detail);
                 }
-                msgDiv.classList.remove('hidden');
             } catch (error) {
-                msgDiv.className = 'error-msg';
-                msgDiv.textContent = 'Error cancelling booking';
-                msgDiv.classList.remove('hidden');
+                alert('Error connecting to server.');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
             }
         }
 
@@ -1198,8 +1531,11 @@
                 el.classList.toggle('hidden', idx + 1 !== step);
             });
 
-            // Show cancel section only on step 1
-            document.getElementById('cancelSection').classList.toggle('hidden', step !== 1);
+            // Show manage section only on step 1
+            const manageSection = document.getElementById('manageSection');
+            if (manageSection) {
+                manageSection.classList.toggle('hidden', step !== 1);
+            }
 
             // Load data for step
             if (step === 2) loadSeats();
@@ -1248,9 +1584,6 @@
                 document.getElementById('passengerEmail').value = '';
                 goToStep(1);
             });
-
-            // Cancel
-            document.getElementById('cancelBtn').addEventListener('click', cancelBooking);
         }
     </script>
 </body>
