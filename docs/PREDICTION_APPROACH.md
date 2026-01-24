@@ -82,28 +82,14 @@ Since real historical booking data is unavailable, a **synthetic dataset** with 
 
 The synthetic data follows realistic booking behavior patterns:
 
-```python
-def calculate_confirmation_probability(row):
-    base_prob = 0.70  # 70% base confirmation rate
-  
-    # Lower deck = more committed (+5%)
-    seat_effect = 0.05 if row['seat_type'] == 1 else 0
-  
-    # Meal selected = more invested (+10%)
-    meal_effect = 0.10 if row['meal_selected'] == 1 else 0
-  
-    # More lead days = planned trip (+0.5% per day, max +15%)
-    lead_effect = min(row['booking_lead_days'] * 0.005, 0.15)
-  
-    # Weekend travel = leisure, more committed (+8%)
-    is_weekend = row['day_of_week'] in [4, 5, 6]
-    weekend_effect = 0.08 if is_weekend else 0
-  
-    # More seats = group coordination issues (-3% per extra seat)
-    seat_count_effect = -(row['num_seats'] - 1) * 0.03
-  
-    return base_prob + seat_effect + meal_effect + lead_effect + weekend_effect + seat_count_effect
-```
+The synthetic data follows realistic booking behavior patterns defined by these rules:
+
+*   **Base Probability:** Every booking starts with a **70%** chance of confirmation.
+*   **Meal Selection:** Adding a meal increases chance by **+10%** (indicates commitment).
+*   **Weekend Travel:** Booking for Fri/Sat/Sun increases chance by **+8%** (leisure trips are less likely to cancel).
+*   **Seat Type:** Lower deck seats increase chance by **+5%** (preferred by committed travelers).
+*   **Lead Time:** Booking earlier increases chance by **+0.5% per day** (up to +15% max).
+*   **Group Size:** Each additional seat beyond the first decreases chance by **-3%** (coordination issues).
 
 ### Sample Data
 
@@ -123,12 +109,12 @@ def calculate_confirmation_probability(row):
 
 **Why Logistic Regression?**
 
-| Criteria                    | Logistic Regression | Random Forest | Neural Network |
-| --------------------------- | ------------------- | ------------- | -------------- |
-| **Interpretability**  |  High             | Medium        | Low            |
-| **Training Speed**    |  Fast             | Medium        | Slow           |
-| **Data Requirements** |  Low              | Medium        | High           |
-| **Overfitting Risk**  |  Low              | Medium        | High           |
+| Criteria | Logistic Regression | Reasoning |
+| :--- | :--- | :--- |
+| **Interpretability** | **High** | Feature weights (coefficients) directly translate to impact (e.g., "+0.45" means probability increases). |
+| **Training Speed** | **Fast** | Solves a convex optimization problem (simple math) rather than iterating through thousands of trees or layers. |
+| **Data Requirements** | **Low** | Performs well with small datasets (N=1000) where complex models like Neural Networks would underfit due to lack of patterns. |
+| **Overfitting Risk** | **Low** | Linear decision boundary prevents the model from "memorizing" noise in the synthetic data, unlike decision trees. |
 
 For this use case, **interpretability** and **simplicity** are prioritized over marginal accuracy gains.
 
@@ -168,13 +154,13 @@ pickle.dump({'model': model, 'scaler': scaler}, open('prediction_model.pkl', 'wb
 
 ### Feature Coefficients (Learned Weights)
 
-| Feature               | Coefficient | Effect                 |
+| Feature               | Coefficient | Interpretation |
 | --------------------- | ----------- | ---------------------- |
-| `meal_selected`     | +0.45       | ↑ Higher confirmation |
-| `booking_lead_days` | +0.38       | ↑ Higher confirmation |
-| `seat_type` (lower) | +0.22       | ↑ Higher confirmation |
-| `day_of_week`       | +0.15       | ↑ Weekend = Higher    |
-| `num_seats`         | -0.18       | ↓ More seats = Lower  |
+| `meal_selected`     | +0.45       | **Increases** likelihood (User is more invested) |
+| `booking_lead_days` | +0.38       | **Increases** likelihood (Planned transition) |
+| `seat_type` (lower) | +0.22       | **Increases** likelihood (Preferred seats) |
+| `day_of_week`       | +0.15       | **Increases** likelihood (Later in week/Weekend)    |
+| `num_seats`         | -0.18       | **Decreases** likelihood (Larger groups cancel more)  |
 
 **Key Insight:** The model learned that **meal selection** is the strongest predictor of commitment - passengers who pre-order meals are significantly more likely to confirm their booking.
 
