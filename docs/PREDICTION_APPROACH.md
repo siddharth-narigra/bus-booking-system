@@ -80,8 +80,6 @@ Since real historical booking data is unavailable, a **synthetic dataset** with 
 
 ### Data Generation Logic
 
-The synthetic data follows realistic booking behavior patterns:
-
 The synthetic data follows realistic booking behavior patterns defined by these rules:
 
 *   **Base Probability:** Every booking starts with a **70%** chance of confirmation.
