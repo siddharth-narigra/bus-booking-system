@@ -125,10 +125,10 @@ def calculate_confirmation_probability(row):
 
 | Criteria                    | Logistic Regression | Random Forest | Neural Network |
 | --------------------------- | ------------------- | ------------- | -------------- |
-| **Interpretability**  | ✅ High             | Medium        | Low            |
-| **Training Speed**    | ✅ Fast             | Medium        | Slow           |
-| **Data Requirements** | ✅ Low              | Medium        | High           |
-| **Overfitting Risk**  | ✅ Low              | Medium        | High           |
+| **Interpretability**  |  High             | Medium        | Low            |
+| **Training Speed**    |  Fast             | Medium        | Slow           |
+| **Data Requirements** |  Low              | Medium        | High           |
+| **Overfitting Risk**  |  Low              | Medium        | High           |
 
 For this use case, **interpretability** and **simplicity** are prioritized over marginal accuracy gains.
 
@@ -252,9 +252,9 @@ With real production data, potential enhancements include:
 
 This prediction feature demonstrates:
 
-- ✅ **Iterative ML development** - Starting simple, improving with data
-- ✅ **Practical problem-solving** - Working with limited data constraints
-- ✅ **Clean code architecture** - Modular, maintainable, documented
-- ✅ **End-to-end implementation** - From data generation to deployed API
+-  **Iterative ML development** - Starting simple, improving with data
+-  **Practical problem-solving** - Working with limited data constraints
+-  **Clean code architecture** - Modular, maintainable, documented
+-  **End-to-end implementation** - From data generation to deployed API
 
 The Logistic Regression model provides interpretable, reliable predictions while maintaining the flexibility to upgrade to more sophisticated models when real data becomes available.
