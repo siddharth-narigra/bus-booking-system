@@ -907,10 +907,11 @@
     </div>
 
     <script>
-        // API Base URL (Production: Render, Local: localhost)
-        // API Base URL (Production: Render, Local: localhost)
-        // const API_BASE = 'https://bus-booking-system-yqmk.onrender.com/api'; 
-        const API_BASE = 'http://127.0.0.1:8000/api';
+        // API Base URL
+        // Automatically switches between Local and Production based on where the frontend is running
+        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://127.0.0.1:8000/api'
+            : 'https://bus-booking-system-yqmk.onrender.com/api';
 
         // State
         let stations = [];
