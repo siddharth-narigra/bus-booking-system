@@ -38,20 +38,20 @@ This document explains **how the whole project fits together** – backend, fron
 ### 1.1 High‑Level Architecture Diagram
 
 ```mermaid
-flowchart LR
-    FE[Frontend (index.html)]
+graph LR
+    FE[Frontend index.html]
 
-    APP[FastAPI app (main.py)]
-    STN[Stations API\n(stations.py)]
-    SEAT[Seats API\n(seats.py)]
-    MEAL[Meals API\n(meals.py)]
-    BOOK[Bookings API\n(bookings.py)]
-    PRED[Prediction API\n(predict.py)]
+    APP[FastAPI app main.py]
+    STN[Stations API]
+    SEAT[Seats API]
+    MEAL[Meals API]
+    BOOK[Bookings API]
+    PRED[Prediction API]
 
-    DBLAYER[DB layer\n(database.py + models.py)]
+    DBLAYER[DB layer]
     SQLITE[SQLite DB]
 
-    TRAIN[Training script\n(train_model.py)]
+    TRAIN[train_model.py]
     DATA[booking_data.csv]
     MODELFILE[prediction_model.pkl]
 
