@@ -39,66 +39,39 @@ This document explains **how the whole project fits together** – backend, fron
 
 ```mermaid
 flowchart LR
-    subgraph Browser
-        FE[Frontend SPA<br/>frontend/index.html]
-    end
+    FE[Frontend (index.html)]
 
-    subgraph Backend[FastAPI Backend]
-        APP[main.py<br/>FastAPI app & routing]
+    APP[FastAPI app (main.py)]
+    STN[Stations API\n(stations.py)]
+    SEAT[Seats API\n(seats.py)]
+    MEAL[Meals API\n(meals.py)]
+    BOOK[Bookings API\n(bookings.py)]
+    PRED[Prediction API\n(predict.py)]
 
-        subgraph Routes
-            STN[/stations.py<br/>/api/stations/]
-            SEAT[/seats.py<br/>/api/seats/]
-            MEAL[/meals.py<br/>/api/meals/]
-            BOOK[/bookings.py<br/>/api/bookings/]
-            PRED[/predict.py<br/>/api/predict/]
-        end
+    DBLAYER[DB layer\n(database.py + models.py)]
+    SQLITE[SQLite DB]
 
-        subgraph Core
-            SCHEMAS[schemas.py<br/>Pydantic request/response]
-            MODELS[models.py<br/>SQLAlchemy ORM]
-            DB[database.py<br/>SessionLocal & engine]
-        end
+    TRAIN[Training script\n(train_model.py)]
+    DATA[booking_data.csv]
+    MODELFILE[prediction_model.pkl]
 
-        subgraph ML[ML & Data]
-            TRAIN[train_model.py<br/>offline training]
-            CSV[(booking_data.csv)]
-            PKL[(prediction_model.pkl)]
-        end
-    end
-
-    subgraph Storage
-        SQLITE[(SQLite DB file)]
-        MODEL_FILE[(models/prediction_model.pkl)]
-    end
-
-    FE -->|HTTP (fetch)| APP
+    FE --> APP
     APP --> STN
     APP --> SEAT
     APP --> MEAL
     APP --> BOOK
     APP --> PRED
 
-    STN --> SCHEMAS
-    SEAT --> SCHEMAS
-    MEAL --> SCHEMAS
-    BOOK --> SCHEMAS
+    STN --> DBLAYER
+    SEAT --> DBLAYER
+    MEAL --> DBLAYER
+    BOOK --> DBLAYER
 
-    STN --> MODELS
-    SEAT --> MODELS
-    MEAL --> MODELS
-    BOOK --> MODELS
+    DBLAYER --> SQLITE
 
-    STN --> DB
-    SEAT --> DB
-    MEAL --> DB
-    BOOK --> DB
-    DB --> SQLITE
-
-    TRAIN --> CSV
-    TRAIN --> PKL
-    PKL --> MODEL_FILE
-    PRED --> MODEL_FILE
+    TRAIN --> DATA
+    TRAIN --> MODELFILE
+    PRED --> MODELFILE
 ```
 
 ---
