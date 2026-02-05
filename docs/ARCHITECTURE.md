@@ -79,9 +79,20 @@ flowchart LR
     APP --> BOOK
     APP --> PRED
 
-    STN & SEAT & MEAL & BOOK --> SCHEMAS
-    STN & SEAT & MEAL & BOOK --> MODELS
-    STN & SEAT & MEAL & BOOK --> DB
+    STN --> SCHEMAS
+    SEAT --> SCHEMAS
+    MEAL --> SCHEMAS
+    BOOK --> SCHEMAS
+
+    STN --> MODELS
+    SEAT --> MODELS
+    MEAL --> MODELS
+    BOOK --> MODELS
+
+    STN --> DB
+    SEAT --> DB
+    MEAL --> DB
+    BOOK --> DB
     DB --> SQLITE
 
     TRAIN --> CSV
